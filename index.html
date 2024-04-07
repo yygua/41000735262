@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<!-- saved from url=(0094)http://www.zmdsbdc.com.cn/wxfwpt/Public/RightCert?q=84e40c49518a4ac390e675506d716192&sc=411700 -->
+<html class="pixel-ratio-1"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>证书查询</title>
+    <link href="./weuix.min.css" rel="stylesheet">
+    <link href="./weui3.css" rel="stylesheet">
+    <link href="./responsive.css" rel="stylesheet">
+    <script src="./zepto.min.js.下载"></script>
+    <script src="./common.js.下载"></script>
+    <script src="./device.js.下载"></script>
+    <script src="./dsbridge.js.下载"></script>
+    <style type="text/css">
+        #currentCompany {
+            position: fixed;
+            padding-top: 0;
+            padding-bottom: 0;
+            background-color: white;
+            height: 40px;
+            width: 100%;
+            line-height: 40px;
+            z-index: 999;
+            border-bottom: 1px solid #d9d9d9;
+        }
+
+        .main_div {
+            margin-top: 40px;
+        }
+
+        #PSelect {
+            border: hidden;
+            appearance: none;
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            background: url("../Images/arr_down.png") no-repeat scroll right center transparent padding-box;
+            padding-right: 40px;
+            font-size: 1.5rem;
+            color: gray;
+            float: left;
+            line-height: 40px;
+        }
+        /*.tip .item { padding-left: 55px; }*/
+        .weui_dialog, .weui_toast {
+            z-index: 1002;
+        }
+
+        .applyer_info {
+            display: none;
+            visibility: visible;
+            transform-origin: 0px 0px 0px;
+            opacity: 1;
+            transform: scale(1, 1);
+        }
+
+        .weui_dialog.applyer_info {
+            left: 3%;
+            top: 30%;
+            width: 94%;
+            height: 26%; /*position:fixed;*/
+        }
+
+        .applyer_info .weui_cells_title { /*position:fixed;top:0;width:94%;*/
+        }
+
+        .applyer_info .weui_cells_form { /*padding-top:34px;padding-bottom:50px;*/
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .applyer_info .weui_dialog_ft {
+            margin-top: -1px; /*position:fixed;bottom:0;width:100%;*/
+            background-color: white;
+        }
+
+        .applyer_info .weui_cells.weui_cells_form::after {
+            border-bottom-width: 0;
+        }
+
+        .applyer_info .weui_cells.weui_cells_form::before {
+            border-top-width: 0;
+        }
+        /*图片上传样式修正*/
+        /* .doc_pics {display: inline-block !important;}*/
+        .doc_pics3 {
+            display: inline-block !important;
+        }
+
+        .doc_pics2 {
+            display: flex !important;
+        }
+    </style>
+    <link href="./style.css" rel="stylesheet">
+    
+
+    <script>
+    var dicModel = JSON.parse('[]');
+    function ChooseRealAuth(result, bizTypeCode, callback, errorcallback) {
+           if ("" == "C") {
+               if (bridge.hasNativeMethod('thirdTakeVideo')) {
+                   //如果是app则需要开启摄像头权限
+                   bridge.call("thirdTakeVideo", function (err) {
+                       if (err == "1") {
+                           RealAuth(result, bizTypeCode, callback, errorcallback);
+                       }
+                   });
+               } else {
+                   RealAuth(result, bizTypeCode, callback, errorcallback);
+               }
+            } else {
+                RealAuth(result, bizTypeCode, callback, errorcallback);
+            }
+        }
+
+
+        function RealAuth(result, bizTypeCode, callback, errorcallback) {
+            if ('' == "1") {//如果身份验核还没有过期
+                if (typeof callback == "function") {
+                    callback();
+                }
+            }
+            else if ('' == "1" || result == true) {//需要实名验证
+                var opear = [];
+                if (!dicModel || dicModel.length == 0) {
+                    $.alert("暂无可实名的服务商！");
+                    return false;
+                } else if (dicModel.length > 1) {
+                    $.each(dicModel, function (k, n) {
+                        opear.push({
+                            text: n.ProviderName,
+                            className: "color-primary",
+                            onClick: function () {
+                                $.showLoading();
+                                $.post("/wxfwpt/Biz/RealNameAuth", { realAuthTypeCode: n.ProviderCode, realNameAuthBizType: ("" || bizTypeCode) }, function (data) {
+                                    $.hideLoading();
+                                    if (data[0]) {
+                                        if (n.ProviderCode == "2") {
+                                            $.hideLoading(); $(".loading2").find("p").text("跳转中"); $(".loading2").show(); // $.showLoading("跳转中");
+                                            location.href = data[1];
+                                        } else if (n.ProviderCode == "10") {
+                                            //$('.assessFrame iframe').attr('src', data[1]);
+                                            //$('.assessFrame').addClass("weui_dialog_visible").show();
+                                            //$('body').css('overflow', 'hidden');
+                                            $.hideLoading(); $(".loading2").find("p").text("跳转中"); $(".loading2").show(); // $.showLoading("跳转中");
+                                            location.href = data[1];
+                                        } else {
+                                            dsBridge.call("getCertificationImage", "", function (param) {
+                                                if (param) {
+                                                    $.showLoading();
+                                                    $.post("/wxfwpt/Biz/JAPersonContrast", { url: data[1], Base64Photo: param }, function (jaresult) {
+                                                        $.hideLoading();
+                                                        if (jaresult[0]) {
+                                                            if (typeof callback == "function") {
+                                                                callback();
+                                                            } else {
+                                                                window.location.reload();
+                                                            }
+                                                        } else {
+                                                            if (typeof errorcallback == "function") {
+                                                                errorcallback();
+                                                            }
+                                                            $.alert(jaresult[1]);
+                                                        }
+                                                    });
+                                                } else {
+                                                    if (typeof errorcallback == "function") {
+                                                        errorcallback();
+                                                    }
+                                                }
+
+                                            });
+                                        }
+                                    } else {
+                                        if (typeof errorcallback == "function") {
+                                            errorcallback();
+                                        }
+                                        $.alert(data[1]);
+                                        if (data[1].indexOf("用户信息不全") > -1) {
+                                            $.hideLoading();$(".loading2").find("p").text("用户信息不全,请完善！"); $(".loading2").show();
+                                            location.href = '../Web/PersonalInfo';
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    $.actions({
+                        title: "选择需要实名的服务商",
+                        onClose: function () {
+
+                        },
+                        initDone: function () {
+                            $(document).off('tap click', '.weui_actions_mask');
+                            $('.weui_actionsheet_action').tap(function () {
+                                var url = location.href;
+                                if (url.toLowerCase().indexOf("olaplupload") > -1 || url.toLowerCase().indexOf("pcrinfo") > -1) {
+
+                                } else {
+                                   dsBridge.call('goHome', '');
+                                }
+
+                            });
+                        },
+                        actions: opear
+                    });
+                    localStorage.setItem("WX_ReturnUrl", window.location.href);
+                } else {
+                    $.showLoading();
+                    $.post("/wxfwpt/Biz/RealNameAuth", { realAuthTypeCode: dicModel[0].ProviderCode, realNameAuthBizType: ("" || bizTypeCode) }, function (data) {
+                        $.hideLoading();
+                        if (data[0]) {
+                            if (dicModel[0].ProviderCode == "2") {
+                                $.hideLoading(); $(".loading2").find("p").text("跳转中"); $(".loading2").show(); // $.showLoading("跳转中");
+                                location.href = data[1];
+                            } else if (dicModel[0].ProviderCode == "10") {
+                                $.hideLoading(); $(".loading2").find("p").text("跳转中"); $(".loading2").show(); // $.showLoading("跳转中");
+                                location.href = data[1];
+                            } else {
+                                dsBridge.call("getCertificationImage", "", function (param) {
+                                    if (param) {
+                                        $.showLoading();
+                                        $.post("/wxfwpt/Biz/JAPersonContrast", { url: data[1], Base64Photo: param }, function (jaresult) {
+                                            $.hideLoading();
+                                            if (jaresult[0]) {
+                                                if (typeof callback == "function") {
+                                                    callback();
+                                                } else {
+                                                    window.location.reload();
+                                                }
+                                            } else {
+                                                if (typeof errorcallback == "function") {
+                                                    errorcallback();
+                                                }
+                                                $.alert(jaresult[1]);
+                                            }
+                                        });
+                                    } else {
+                                        if (typeof errorcallback == "function") {
+                                            errorcallback();
+                                        }
+                                    }
+
+                                });
+                            }
+                        } else {
+                            if (typeof errorcallback == "function") {
+                                errorcallback();
+                            }
+                            if (data[1].indexOf("用户信息不全") > -1) {
+                                $.hideLoading(); $(".loading2").find("p").text("用户信息不全,请完善！"); $(".loading2").show();
+                                location.href = '../Web/PersonalInfo';
+                            } else {
+                                $.alert(data[1]);
+                            }
+                        }
+                    });
+                    localStorage.setItem("WX_ReturnUrl", window.location.href);
+                }
+            }
+            else {
+                if (typeof callback == "function") {
+                    callback();
+                }
+            }
+        }
+
+    </script>
+    <script type="text/javascript">
+        function closeFrame() {
+            $('.verifyFrame').hide();
+        }
+        $(function () {
+            if ($('.weui_article').length > 0) {
+                $('.main_div').height($(window).height() - 10);
+            }
+            //if ($.device.ios) {
+            //    $('a[_href]').each(function () {
+            //        var $this = $(this);
+            //        var href = $(this).attr('_href');
+            //        if (href.indexOf('javascript:') > -1) {
+            //            $this.live('tap', function () {
+            //                eval(href.replace('javascript:', ''));
+            //            });
+            //        }
+            //        else {
+            //            $this.removeAttr('_href').attr('href', href);
+            //        }
+            //    });
+            //}
+            //else {
+            $('a[_href]').live('tap', function () {
+                $.showLoading('跳转中');
+                if ($(this).attr('replacelink') == "1") {
+                    window.location.replace($(this).attr('_href'));
+                } else {
+                    location.href = $(this).attr('_href');
+                }
+            });
+            //}
+            $("#returnappurl,.returnappurl").live('tap',function () {
+                dsBridge.call('goHome', '');
+            })
+
+            window.onpopstate = function () {
+                $.hideLoading();
+            };
+            window.history.replaceState(null, null, null);
+
+            $("#PSelect").change(function (event) {
+                var userId = '';//获取登录用户ID
+                var isLogin = "";//是否登录
+                var indexUrl = "";//单位选择后跳转地址
+                if (userId == "" || userId == null) {//判断是否登录
+                    isLogin = "0";
+                }
+                else {
+                    isLogin = "1";
+                }
+
+                if (isLogin) {
+                    //针对办事指南的跳转
+                    if (isLogin == "0") {
+                        indexUrl = '/wxfwpt/Web/BizGuideIndex';
+                    }
+                    else {
+                        indexUrl = '/wxfwpt/Web/Index';
+                    }
+                }
+                else {
+                        indexUrl = '/wxfwpt/Web/Index';
+                }
+                var $this = $(this);
+                event.stopPropagation();
+                $.showLoading('加载中');
+                $.post(indexUrl, { action: 'choose', companyid: $(this).val() }, function (result) {
+                     //
+                    $.hideLoading();
+                    if (result[0]) {
+                        $.showLoading('加载中');
+
+                        var jsonCom = { "CompanyID": $this.val(), "CompanyName": $('#PSelect option[value="' + $this.val() + '"]').html(), "CompanyShortName": $('#PSelect option[value="' + $this.val() + '"]').attr('short') };
+                        dsBridge.call("changeCompanyInfo", JSON.stringify(jsonCom));
+                        if ($.params('com')) {
+                            location.href = $.replaceParamVal('com', $this.val(), location.href);
+                        } else {
+                            location.href = location.href;
+                            // $.hideLoading();
+                        }
+                    }
+                    else {
+                        $.alert(result[1], '提示');
+                    }
+                });
+            }).val('');
+
+            $('.closeAssessFrame').click(function () {
+                $('.assessFrame').hide();
+                $('body').css('overflow', 'auto');
+            });
+            $('.closehouseSltFrame').click(function () {
+                $('.houseSltFrame').hide();
+                $('body').css('overflow', 'auto');
+            });
+
+            $('.closeCadastraMapFrame').click(function () {
+                $('.CadastraMapFrame').hide();
+                $('body').css('overflow', 'auto');
+            });
+            //APP处理
+            if ('' == "C") {
+                $(".weui-menu").hide();
+                 //单位隐藏
+                //$("#currentCompany").hide();
+                //$("#form").css("padding-top", "0px");//进度查询
+                //$(".weui_article").css("padding-top", "0px");//个人中心列表
+                //$(".formDiv").css("padding-top", "0px");//预约、旧申请
+                //$(".weui_cells_form").css("padding-top", "0px");//个人中心编辑
+                //$(".weui-header.searchDiv").css("top", "47px");//公告、互动交流
+                //$(".weui_panel_access").css("padding-top", "45px");//公告、互动交流
+                //$(".weui-header.bg-darkblue").next().css("padding-top", "3px");//通用
+                //$(".weui-header.bg-darkblue").next().css("margin-top", "3px");//资料预约
+            }
+
+        });
+        $("#no_Real").tap(function () {
+            $("#RealNameAuthProvider").hide();
+        });
+        var JAdsBridge = function (back) {
+            dsBridge.call("getCertificationImage", "", function (param) {
+                if (typeof back == "function") {
+                    back(param);
+                } else {
+                    $.alert("传入的类型不是方法！");
+                }
+
+            });
+
+        }
+    </script>
+</head>
+<body ontouchstart="" style="height:100%;">
+
+    <style>
+        .loading2 .weui-loading { width: 35px; height: 35px; font-size: 1rem; display: block; margin: 0 auto; margin-top: 10% }
+
+        .loading2 { color: #fff; position: fixed; box-sizing: border-box; left: -9999px; top: -9999px; width: 0; height: 0; overflow: hidden; z-index: 999999 }
+
+            .loading2:after, .loading2:before { box-sizing: border-box }
+
+        .loading2 { background-color: rgba(0,0,0,0.7); width: 30%; height: 15%; left: 35%; top: 40%; border-radius: .1rem }
+
+            .loading2 p { position: absolute; left: 0; margin-top: 75%; color: #fff; font-family: Helvetica,Arial,sans-serif; text-align: center; width: 100%; font-size: 14px; top: calc(50% - 65%) }
+    </style>
+    <div class="loading2" style="opacity:1;display:none;">
+        <i class="weui-loading"></i>
+        <p style="margin-top:65%;">跳转中</p>
+    </div>
+    <div class="page-bd-15 weui-header-title" id="currentCompany" style="top:40px;">
+        <img style="width: 22px; height: 22px; padding-right: 5px; display: block; float: left;padding-top:7px;margin-left:5px;" src="./blue_organ.png">
+        <select id="PSelect">
+
+        </select>
+    </div>
+    
+    <div class="main_div">
+        
+<link href="./PublicQRCodeSearch.css" rel="stylesheet">
+<style>
+    #form { padding-top: 40px; }
+</style>
+<script type="text/javascript">
+    $(function () {
+        $('#PSelect').after('郑州市不动产登记交易中心')
+    });
+</script>
+<div class="weui-header bg-darkblue">
+    <div class="weui-header-left showinapp" style="display:none"> <a id="returnurl" class="icon icon-109 f-white" href="javascript:history.go(-1);"></a>  </div>
+    <h1 class="weui-header-title">不动产权证书信息</h1>
+    <div class="weui-header-right showinapp" style="display:none"><a class="icon icon-27 f-white" href="javascript:void(0);"></a></div>
+</div>
+<form id="form">
+            <div class="weui_cells weui_cells_form">
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">编  号</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        41000735262
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">登记机构</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        郑州市不动产登记服务中心
+                    </div>
+                </div>
+                <div class="weui_cells_title text-black"> </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">证书号</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        豫（2018）郑州市不动产权第0073128号
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">权利人</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        梁书义
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">共有情况</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        单独所有
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">登记日期</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        2018/10/22 16:19:01
+                    </div>
+                </div>
+                <div class="weui_cells_title text-black"> </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">不动产单元号</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        410108006012GB00028F00090113
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">坐 落</label></div>
+                    <div class="weui_cell_bd weui_cell_primary ">
+                        惠济区湖南东路思念果岭悦庄5期1区-5号1层101
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">权利类型</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        国有建设用地使用权/房屋所有权
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">权利性质</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        出让/市场化商品房
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">用途</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        住宅用地/成套住宅
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">面  积</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+
+                        土地使用权面积（120429.63平方米）/房屋建筑面积（112.24平方米）
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">使用期限</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        2013-11-29至2083-11-28结束
+                    </div>
+                </div>
+                <div class="weui_cells_title text-black"> </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">附 记</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                        
+                    </div>
+                </div>
+                <div class="weui_cell">
+                    <div class="weui_cell_hd"><label class="weui_label">限制状态</label></div>
+                    <div class="weui_cell_bd weui_cell_primary">
+                       </div>
+
+    <table class="tip2">
+        <tbody><tr>
+            <td><img src="./u1750.png"></td>
+            <td>提示：本次查询结果仅供参考，如需最新数据请到登记中心窗口查询。</td>
+        </tr>
+    </tbody></table> 
+</form>
+<div class="weui-gallery" style="display: none; ">
+    <div class="weui-gallery-opr" style="top: 0;height: 60px;z-index: 1;">
+        <a href="javascript:$(&#39;.weui-gallery&#39;).hide();" class="weui-gallery-close">
+            <i class="icon icon-73 f-gray"></i>
+        </a>
+    </div>
+</div>
+
+<script src="./pinch-zoom.js.下载" type="text/javascript" charset="utf-8"></script>
+<script>
+    $(function () {
+        if (bridge.hasNativeMethod('share')) {//APP
+            $(".showinapp").show();
+        }
+
+        $(".weui-header-right").click(function () {
+            dsBridge.call('goHome', '');
+        });
+        //打开图片预览
+        $(document).on("click", '.weui_cell img', function () {
+            $(".pinch-zoom-container").remove();
+            $('.weui-gallery').append('<span class="weui-gallery-img"></span>');
+            $('.weui-gallery .weui-gallery-img').css('background-image', 'url(' + $(this).attr('src') + ')');
+            $('.weui-gallery').show();
+            var el = document.querySelector('.weui-gallery .weui-gallery-img');
+            new PinchZoom.default(el, { zoomOutFactor: 1 });
+            $(".pinch-zoom-container").css("height", "100%");
+        });
+    });
+</script>
+        
+    </div>
+    <div class="weui_dialog weui_dialog_visible assessFrame" style="display: none; transform-origin: 0px 0px; opacity: 1; transform: scale(1, 1);width:100%;height:100%;left:0;top:0;">
+        <div class="weui_cells_title text-black text-bold" style="border-bottom: 1px solid #d9d9d9;">业务评价<span class="icon icon-95 closeAssessFrame" style="float:right;margin-top:-3px;"></span></div>
+        <iframe style="width:99%;height:94%;border:0;" src="./saved_resource.html"></iframe>
+    </div>
+    <div class="weui_dialog weui_dialog_visible verifyFrame" style="display: none; transform-origin: 0px 0px; opacity: 1; transform: scale(1, 1);width:100%;height:100%;left:0;top:0;-webkit-overflow-scrolling:touch;overflow:auto; touch-action: none;touch-action: pan-y;">
+        <div class="weui_cells_title text-black text-bold" style="border-bottom: 1px solid #d9d9d9;">申请确认<span class="icon icon-95 closeVerifyFrameFrame" onclick="$(&#39;.verifyFrame&#39;).hide();" style="float:right;margin-top:-3px;"></span></div>
+        <iframe style="width:100%;height:93%;border:0;" src="./saved_resource(1).html" id="mainFrame"></iframe>
+    </div>
+    <div class="weui_dialog weui_dialog_visible cQFrame" style="display: none; transform-origin: 0px 0px; opacity: 1; transform: scale(1, 1);width:100%;height:100%;left:0;top:0;-webkit-overflow-scrolling:touch;overflow:auto; touch-action: none;touch-action: pan-y;">
+        <div class="weui_cells_title text-black text-bold" style="border-bottom: 1px solid #d9d9d9;">产权查询<span class="icon icon-95 closeVerifyFrameFrame" onclick="$(&#39;.cQFrame&#39;).hide();" style="float:right;margin-top:-3px;"></span></div>
+        <iframe style="width:100%;height:95%;border:0;" src="./saved_resource(2).html"></iframe>
+    </div>
+    <div class="weui_dialog weui_dialog_visible houseSltFrame" style="display: none; transform-origin: 0px 0px; opacity: 1; transform: scale(1, 1);width:100%;height:100%;left:0;top:0;">
+        <div class="weui_cells_title text-black text-bold" style="border-bottom: 1px solid #d9d9d9;">楼幢选择<span class="icon icon-95 closehouseSltFrame" style="float:right;margin-top:-3px;"></span></div>
+        <iframe style="width:99%;height:94%;border:0;" src="./saved_resource(3).html"></iframe>
+    </div>
+    <div class="weui_dialog weui_dialog_visible CadastraMapFrame" style="display: none; transform-origin: 0px 0px; opacity: 1; transform: scale(1, 1);width:100%;height:100%;left:0;top:0;">
+        <div class="weui_cells_title text-black text-bold" style="border-bottom: 1px solid #d9d9d9;">地籍图查询<span class="icon icon-95 closeCadastraMapFrame" style="float:right;margin-top:-3px;"></span></div>
+        <iframe style="width:99%;height:94%;border:0;" src="./saved_resource(4).html"></iframe>
+    </div>
+    <iframe src="./User_Sign.html" id="iframe" style="width:100%;height:95%;border:0;z-index:-1;position:fixed;" frameborder="0"></iframe>
+
+
+<script>
+    dsBridge.register('nativeBack', function () {
+        var dis = $(".assessFrameExt").css("display");
+        if (dis == "block") {//办事指南跳转外链
+            $(".assessFrameExt").hide();
+            $(".assessFrameExt").empty().append(' <div class="weui-header bg-darkblue"><div class= "weui-header-left"> <a class="icon icon-109 f-white closeicon"href="javascript:void(0)"></a> </div></div><iframe id="iframeExt" style="width:100%;height:100%;border:0;margin-top:40px;" src=""></iframe>');
+            try {
+                var frame = document.getElementById("iframeExt"), frameDoc = frame.contentDocument || frame.contentWindow.document;
+                frameDoc.removeChild(frameDoc.documentElement);
+            } catch (e) { console.info(e) }
+            $.hideLoading();
+            return false;
+        } else {
+            var url = $('.weui-header-left').find("a").attr('_href');
+            if (url) {
+                $.showLoading('跳转中');
+                var urlext = $('#returnurl').attr('_href');
+                window.location.href = urlext ? urlext : url;
+                return false;
+            } else {
+                return true;
+            }
+        }
+    });
+
+    //图片上传样式修正
+    function FixUploadCss() {
+        $(".weui_uploader_files").each(function () {
+            if ($(this).find("li").length >= 3) {
+                $(this).parent().removeClass("doc_pics2");
+                $(this).parent().removeClass("doc_pics3");
+                $(this).parent().addClass("doc_pics3");
+            } else {
+                $(this).parent().removeClass("doc_pics2");
+                $(this).parent().removeClass("doc_pics3");
+                $(this).parent().addClass("doc_pics2");
+            }
+        });
+    }
+    function BindUploadCss() {
+        FixUploadCss();
+        $(".weui_uploader_files").bind('DOMNodeInserted', function (e) {
+            //console.log('element now contains: ' + $(e.target).html());
+            FixUploadCss();
+        });
+        $(".weui_uploader_files").bind('DOMNodeRemoved', function (e) {
+            //console.log('element now contains: ' + $(e.target).html());
+            FixUploadCss();
+        });
+    }
+    $(function () {
+        BindUploadCss();
+    });
+</script></body></html>
