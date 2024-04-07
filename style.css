@@ -1,0 +1,60 @@
+﻿
+.blue_nextbtn, .weui-footer .weui_btn_primary, #form1 .weui_btn_primary {
+    width: 92% !important;
+    border-radius: 4rem !important;
+    margin-left: 4%;
+    border: none;
+    color: #FFFFFF;
+    border-radius: 0.44rem;
+    -moz-border-radius: 0.44rem;
+    -webkit-border-radius: 0.44rem;
+    background: linear-gradient(left, #49c9ff, #3593ff);
+    background: -ms-linear-gradient(left, #49c9ff, #3593ff);
+    background: -webkit-linear-gradient(left, #49c9ff, #3593ff);
+    background: -moz-linear-gradient(left, #49c9ff, #3593ff);
+    box-shadow: 0px 7px 7px 0px rgba(74, 159, 242, 0.4);
+}
+.weui-header {
+    background: linear-gradient(left, #3593ff, #49c9ff);
+    background: -ms-linear-gradient(left, #3593ff, #49c9ff);
+    background: -webkit-linear-gradient(left, #3593ff, #49c9ff);
+    background: -moz-linear-gradient(left, #3593ff, #49c9ff);
+}
+
+.special {
+    color: #FF6600;
+}
+
+.cert_input {
+    height: 36px;
+    border: 1px solid #dedede;
+    border-radius:2px;
+    background:#fff;
+    margin-bottom:4px;
+}
+
+.rtl {
+    direction: rtl;
+}
+
+.text_align_right {
+    text-align: right;
+}
+
+.lab_width {
+    width: 8rem;
+    display: inline-block;
+}
+
+.weui-footer .blue_nextbtn_half {
+    width: 46% !important;
+    float: left;
+    margin: 0 2% !important;
+}
+
+.blue_nextbtn_half_specail  {
+    background: #fff !important;
+    color: #3593ff !important;
+    border: 1px solid #3593ff;
+    box-shadow: none;
+}

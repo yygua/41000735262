@@ -1,0 +1,14 @@
+﻿#form { padding-top: 40px; padding-bottom: 0px; }
+#PSelect { display: none; }
+.tip { width: 94%; font-size: 14px; border-radius: 4px; line-height: 22px; }
+    .tip.bg-gray2 { padding: 15px 8px 15px 40px; border: 1px solid #f0f0f0; line-height: 20px; }
+.weui_cells { margin-top: 0; }
+.hlight { color: #69c3ff; }
+.n_hlight { color: #f90; }
+.o_hlight { color: #999; }
+body { background-color: #f5f5f5; }
+#currentCompany { font-size: 15px; color: gray; }
+.titleLeading { display: inline-block; width: 3px; height: 14px; margin-bottom: -2px; margin-right: 8px; }
+/*.weui_mask { z-index: 1000; }
+.weui_dialog { z-index: 1001; }*/
+.smallSplit { padding-top: 0; margin-bottom: -0.15em; }
